@@ -1,0 +1,38 @@
+name: Build Extension
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch: # Allows you to click a button to manually trigger the build
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build for Firefox
+        run: yarn build --target=firefox-mv2 
+        # Note: We use MV2 because it's more stable for context menus currently, 
+        # but you can try 'firefox-mv3' if you prefer.
+
+      - name: Zip the build
+        run: |
+          cd build/firefox-mv2-prod
+          zip -r ../../extension.zip ./*
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: youtube-watch-later-build
+          path: extension.zip
