@@ -9,20 +9,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4  # Updated to v4
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4  # Updated to v4
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'yarn'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build for Firefox
-        run: yarn build --target=firefox-mv2
+        run: pnpm build --target=firefox-mv2
 
       - name: Zip the build
         run: |
@@ -30,7 +34,7 @@ jobs:
           zip -r ../../extension.zip ./*
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4  # THE CRITICAL FIX (v3 -> v4)
+        uses: actions/upload-artifact@v4
         with:
           name: youtube-watch-later-build
           path: extension.zip
